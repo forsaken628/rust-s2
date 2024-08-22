@@ -29,3 +29,6 @@ serde = { version = "1.0.151", features = ["serde_derive"], optional = true }
 
 [dev-dependencies]
 rand = { version = "0.8.5" }
+
+[workspace]
+members = ["s2-sys-bind", "sys"]

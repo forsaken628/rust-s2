@@ -1,0 +1,6 @@
+[submodule "s2-src/source"]
+	path = sys/s2-src/source
+	url = git@github.com:google/s2geometry.git
+[submodule "abseil-src/source"]
+	path = sys/abseil-src/source
+	url = git@github.com:abseil/abseil-cpp.git
