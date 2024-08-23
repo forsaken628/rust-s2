@@ -10,15 +10,8 @@ fn main() {
 }
 
 fn write_bindings(include_path: PathBuf, out_path: &Path) {
-    Builder::default()
+    let mut builder = Builder::default()
         .size_t_is_usize(true)
-        .header(
-            include_path
-                .join("s2/s2latlng.h")
-                .as_os_str()
-                .to_str()
-                .unwrap(),
-        )
         .clang_args(&[
             "-x",
             "c++",
@@ -27,13 +20,31 @@ fn write_bindings(include_path: PathBuf, out_path: &Path) {
             "-fretain-comments-from-system-headers",
         ])
         .ctypes_prefix("libc")
-        .opaque_type("std::string")
-        .opaque_type("Vector2")
-        .opaque_type("Vector3")
-        .allowlist_type("S2LatLng")
         .no_convert_floats()
         .wrap_static_fns(true)
-        //.generate_inline_functions(true)
+        .raw_line("#![allow(nonstandard_style)]\n#![allow(improper_ctypes)]");
+
+    for s in ["s2/s2latlng.h", "s2/s2polyline.h"] {
+        let header = include_path.join(s);
+        builder = builder.header(header.as_os_str().to_str().unwrap());
+    }
+
+    for s in [
+        "std::string",
+        "std::unique_ptr",
+        "std::vector",
+        "absl::Nullable",
+        "Vector2",
+        "Vector3",
+    ] {
+        builder = builder.opaque_type(s);
+    }
+
+    for s in ["S2LatLng", "S2Polyline"] {
+        builder = builder.allowlist_type(s);
+    }
+
+    builder
         .generate()
         .expect("Unable to generate bindings")
         .write_to_file(out_path)
